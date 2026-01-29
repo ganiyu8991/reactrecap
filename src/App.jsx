@@ -8,10 +8,15 @@ import About from './Pages/About'
 import NavBar from './components/NavBar'
 import Signup from './components/signUp'
 import Login from './components/Login'
+import userStore from './Store/userStore'
+import { useEffect } from 'react'
 
 function App() {
   const [count, setCount] = useState(0)
-
+  const {checkAuth} = userStore()
+  useEffect(() => {
+    checkAuth()
+  },)
   return (
     <>
      <BrowserRouter>
