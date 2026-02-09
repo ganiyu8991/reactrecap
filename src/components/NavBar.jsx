@@ -1,92 +1,163 @@
+import { Link, useLocation, useNavigate} from "react-router-dom";
+import userStore from "../Store/userStore";
+import { GiHamburgerMenu } from "react-icons/gi";
+import { IoClose } from "react-icons/io5"; // A cleaner icon for architectural style
+import { useState } from "react";
+import Loader from "./loader";
 
-import { Link } from "react-router-dom"
-import userStore from "../Store/userStore"
+export default function NavBar() {
+  const { user, logout } = userStore();
+  const location = useLocation();
+  const [isOpen, setisOpen] = useState(false);
+  const navigate = useNavigate();
+  const [isNavigating, setIsNavigating] = useState(false);
+  const handleNavigation = (path) => {
+   setisOpen(false);
+   setIsNavigating(true);
+    setTimeout(() => {
+    setIsNavigating(false);
+    navigate(path);
+    }, 1000); 
+  };
+ 
 
+  const toggleMenu = () => {
+    setisOpen(!isOpen);
+  };
 
-export default function NavBar(){
-    const {user} = userStore()
-    return(
-        <nav class="relative bg-gray-800">
-  <div class="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
-    <div class="relative flex h-16 items-center justify-between">
-      <div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
-        <button type="button" command="--toggle" commandfor="mobile-menu" class="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-white/5 hover:text-white focus:outline-2 focus:-outline-offset-1 focus:outline-indigo-500">
-          <span class="absolute -inset-0.5"></span>
-          <span class="sr-only">Open main menu</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 in-aria-expanded:hidden">
-            <path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 not-in-aria-expanded:hidden">
-            <path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </button>
-      </div>
-      <div class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-        <div class="flex shrink-0 items-center text-white">
-         {user?.email}
+  // Helper to keep logic clean and styling consistent
+  const navLinks = [
+    { name: "Research & Insight", path: "/research" },
+    { name: "Career", path: "/career" },
+    { name: "People", path: "/people" },
+    { name: "Projects", path: "/projects" },
+    { name: "About us", path: "/about" },
+    { name: "Contact us", path: "/contact" },
+    { name: "Join us", path: "/signup" },
+  ];
+
+  
+
+  return (
+    
+    <div>
+      {isNavigating && (
+        <div className="fixed inset-0 z-[999] bg-white flex items-center justify-center">
+          <Loader />
         </div>
-        <div class="hidden sm:ml-6 sm:block">
-          <div class="flex space-x-4">
-           
-            <Link 
-  to="/" 
-  class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white">
-  Home
-</Link>
-    <Link 
-  to="/login" 
-  class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white">
-  Login
-</Link>
-            <Link 
-  to="/signup" 
-  class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white">
-  Signup
-</Link>
-            <Link 
-  to="/about" 
-  class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white">
-  About
-</Link>
+      )}
+    <header className="w-full bg-white border-b border-gray-100 sticky top-0 z-[100]">
+      <nav className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+
+        
+        <div
+        onClick={() => handleNavigation("/")}
+        className="flex items-center space-x-2 group cursor-pointer">
+        {/* LOGO AREA */}
+        <div className="flex items-center space-x-2">
+          <div className="w-8 h-8 bg-black flex items-center justify-center">
+            <span className="text-white font-bold text-xs">A</span>
+          </div>
+          <h1 className="text-xl font-bold tracking-tighter text-black uppercase">
+            Arch<span className="font-light text-gray-500">Build</span>
+          </h1>
+        </div>
+        </div>
+        
+
+        {/* DESKTOP LINKS */}
+        <ul className="hidden md:flex items-center space-x-4">
+          {navLinks.map((link) => (
+            <li key={link.name}>
+              <div
+                onClick={() => handleNavigation(link.path)}
+                className={`text-sm uppercase tracking-widest transition-colors duration-300 hover:text-blue-600 cursor-pointer ${
+                  location.pathname === link.path 
+                    ? "font-bold text-black border-b-2 border-black pb-1" 
+                    : "text-gray-500 font-medium"
+                }`}
+              >
+                {link.name}
+              </div>
+            </li>
+          ))}
+          {/* Example of Logic check preserved */}
+          {user && <li className="text-xs font-semibold px-3 py-1 bg-gray-400 rounded-full">Hi, {user.email}</li>}
+
+          {user && (
+  <li className="flex items-center space-x-3">
+    {/* <span className="text-xs font-semibold px-3 py-1 bg-gray-100 rounded-full">
+      Hi, {user.email}
+    </span> */}
+    <button 
+      onClick={logout}
+      className="text-xs uppercase tracking-widest text-red-500 hover:text-red-700 transition-colors font-bold cursor-pointer"
+    >
+      Logout
+    </button>
+  </li>
+)}
+        </ul>
+
+        {/* MOBILE HAMBURGER ICON */}
+        <div className="md:hidden cursor-pointer p-2" onClick={toggleMenu}>
+          <GiHamburgerMenu className="text-2xl text-black" />
+        </div>
+
+        {/* MOBILE SIDEBAR OVERLAY */}
+        {isOpen && (
+          <div 
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden" 
+            onClick={toggleMenu}
+          />
+        )}
+
+        {/* MOBILE SIDEBAR */}
+        <div
+          className={`fixed top-0 right-0 w-72 h-full bg-white shadow-2xl z-50 transform ${
+            isOpen ? "translate-x-0" : "translate-x-full"
+          } transition-transform duration-500 ease-in-out md:hidden`}
+        >
+          <div className="p-6 flex flex-col h-full">
+            <div className="flex justify-end mb-8" onClick={toggleMenu}>
+              <IoClose className="text-3xl text-gray-400 hover:text-black transition-colors" />
+            </div>
+
+            <div className="mb-12">
+               <h1 className="text-xl font-bold tracking-tighter uppercase">ArchBuild</h1>
+            </div>
+
+            <ul className="flex flex-col space-y-6">
+              {navLinks.map((link) => (
+                <li key={link.name} onClick={toggleMenu}>
+                  <div
+                    onClick={() => handleNavigation (link.path)}
+                    className="text-lg font-light tracking-wide text-gray-800 hover:text-blue-600 block cursor-pointer"
+                  >
+                    {link.name}
+                  </div>
+                </li>
+              ))}
+              {user && (
+  <div className="mt-8 border-t border-gray-100 pt-6">
+    <p className="text-sm text-gray-400 mb-4 truncate">{user.email}</p>
+    <button 
+      onClick={logout}
+      className="w-full py-3 bg-black text-white text-sm uppercase tracking-widest hover:bg-gray-800 transition-all"
+    >
+      Log Out
+    </button>
+  </div>
+)}
+            </ul>
+
+            <div className="mt-auto border-t pt-6">
+               <p className="text-xs text-gray-400">© 2026 ArchBuild Research & Insights</p>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-        <button type="button" class="relative rounded-full p-1 text-gray-400 focus:outline-2 focus:outline-offset-2 focus:outline-indigo-500">
-          <span class="absolute -inset-1.5"></span>
-          <span class="sr-only">View notifications</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6">
-            <path d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </button>
-
-    
-        <el-dropdown class="relative ml-3">
-          <button class="relative flex rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
-            <span class="absolute -inset-1.5"></span>
-            <span class="sr-only">Open user menu</span>
-            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" class="size-8 rounded-full bg-gray-800 outline -outline-offset-1 outline-white/10" />
-          </button>
-
-          <el-menu anchor="bottom end" popover class="w-48 origin-top-right rounded-md bg-white py-1 shadow-lg outline outline-black/5 transition transition-discrete [--anchor-gap:--spacing(2)] data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in">
-            <a href="#" class="block px-4 py-2 text-sm text-gray-700 focus:bg-gray-100 focus:outline-hidden">Your profile</a>
-            <a href="#" class="block px-4 py-2 text-sm text-gray-700 focus:bg-gray-100 focus:outline-hidden">Settings</a>
-            <a href="#" class="block px-4 py-2 text-sm text-gray-700 focus:bg-gray-100 focus:outline-hidden">Sign out</a>
-          </el-menu>
-        </el-dropdown>
-      </div>
+      </nav>
+    </header>
     </div>
-  </div>
-
-  <el-disclosure id="mobile-menu" hidden class="block sm:hidden">
-    <div class="space-y-1 px-2 pt-2 pb-3">
-   
-      <a href="#" aria-current="page" class="block rounded-md bg-gray-900 px-3 py-2 text-base font-medium text-white">Dashboard</a>
-      <a href="/login" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white">Login</a>
-      <a href="#" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white">Projects</a>
-      <a href="#" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white">Calendar</a>
-    </div>
-  </el-disclosure>
-</nav>
-    )
+  );
 }
